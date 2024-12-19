@@ -23,24 +23,16 @@ class BookViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='buy')
     def buy(self, request, pk=None):
-        try:
-            with transaction.atomic():
-                updated_count = Book.objects.filter(
-                    id=pk, count__gt=0
-                ).update(count=F('count') - 1)
-                if updated_count == 0:
-                    return Response(
-                        {'detail': 'Книги нет на складе.'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
+        updated_count = Book.objects.filter(
+            id=pk, count__gt=0
+        ).update(count=F('count') - 1)
+        if updated_count == 0:
             return Response(
-                {'message': 'Книга успешно куплена.'},
-                status=status.HTTP_200_OK
+                {'detail': 'Книги нет на складе.'},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        except Exception as e:
-            return Response(
-                {'detail': 'Ошибка при покупке книги: ' + str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        return Response(
+            {'message': 'Книга успешно куплена.'},
+            status=status.HTTP_200_OK
+        )
